@@ -26,23 +26,29 @@ LOGO = """
 
 def print_banner():
     """Display the APiGuard banner with styling"""
+    
     console.clear()
+    console.print()
 
     logo_text = Text(LOGO)
     logo_text.stylize("bold cyan")
-    console.print(logo_text)
+    console.print(Align.left(logo_text))
     
     subtitle = Text("API Security Scanner")
     subtitle.stylize("bold magenta")
-    console.print(Align.center(subtitle))
+    console.print(Align.left(subtitle))
     
-    version_text = Text("alpha")
-    version_text.stylize("dim white")
-    console.print(Align.center(version_text))
+    version_text = Text("v0.1.0-alpha")
+    version_text.stylize("bold yellow")
+    console.print(Align.left(version_text))
     
-    console.print("─" * 80, style="dim cyan")
+    tagline = Text("Secure your APIs with confidence")
+    tagline.stylize("dim italic")
+    console.print(Align.left(tagline))
+    
     console.print()
-   
+    console.print(Align.left("─" * 60), style="dim cyan")
+    console.print()
 def print_status(message, status="info", verbose=False):
     """Enhanced status messages with icons and colors"""
     if not verbose:
@@ -137,9 +143,10 @@ def scan(spec_path, target, output, format, verbose, timeout, concurrent):
 @click.pass_context
 def cli(ctx):
     """APiGuard - API Security Scanner"""
+    
     if ctx.invoked_subcommand is None:
-        # Show interactive menu or help
         print_banner()
+        # Show interactive menu or help
         ctx.get_help()
 cli.add_command(scan)
 
