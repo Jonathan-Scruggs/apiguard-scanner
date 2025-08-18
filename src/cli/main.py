@@ -98,8 +98,11 @@ def show_scan_summary(spec_file, target, output_format, concurrent, timeout):
 
 def scan(spec_path, target, output, format, verbose, timeout, concurrent):
     """
-    Scans an API for security vulnerabilities using OpenAPI specification
+    Scans an API for security vulnerabilities. 
+
+    \b
     SPEC_PATH: Path to your OpenAPI/Swagger specification file
+    \b
     Examples:
       apiguard api-spec.yaml --target https://api.example.com
       apiguard api.yaml -t https://api.com -c 20 --timeout 60 --verbose
@@ -143,12 +146,11 @@ def scan(spec_path, target, output, format, verbose, timeout, concurrent):
 @click.pass_context
 def cli(ctx):
     """APiGuard - API Security Scanner"""
-    
+    print_banner()
     if ctx.invoked_subcommand is None:
-        print_banner()
         # Show interactive menu or help
-        ctx.get_help()
+        console.print(ctx.get_help())
 cli.add_command(scan)
 
 if __name__ == '__main__':
-    cli()
+    cli(ctx={'max_content_width': 120})
