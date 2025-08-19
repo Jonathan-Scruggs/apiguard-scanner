@@ -13,6 +13,8 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeEl
 from rich.text import Text
 from rich.syntax import Syntax
 from rich.align import Align
+
+from core.parsers.openapi_parser import OpenAPIParser
 console = Console()
 
 LOGO = """
@@ -68,8 +70,7 @@ def print_status(message, status="info", verbose=False):
     icon, style = styles.get(status, ("•", "white"))
     console.print(f"{icon} {message}", style=style)
     
-    print(f"{icon} {message}")
-
+   
 def show_scan_summary(spec_file, target, output_format, concurrent, timeout):
     """Displays scan configuration summary"""
 
@@ -85,7 +86,6 @@ def show_scan_summary(spec_file, target, output_format, concurrent, timeout):
     
     console.print(table)
     console.print()
-
 
 @click.command()
 @click.argument('spec_path', type=click.Path(exists=True))
@@ -120,20 +120,20 @@ def scan(spec_path, target, output, format, verbose, timeout, concurrent):
     
   
   
-    if not click.confirm("🚀 Start the security scan?"):
+    if not click.confirm("Start the security scan?"):
         print_status("Scan cancelled by user", "warning", True)
         return
     
-    console.print()
-    
     print_status("Starting APiGuard security scan...", "loading", verbose)
     
-    # TODO: SCAN HERE
+    
+
+    open_api_parser = OpenAPIParser(file_path=spec_path)
+    open_api_parser.parse()
     
     print_status("Security scan completed successfully!", "success", True)
     
-    if verbose:
-        console.print() 
+    
         
     
     # TODO 

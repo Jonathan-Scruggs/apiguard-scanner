@@ -1,4 +1,4 @@
-from ast import Dict, List
+from typing import Dict, List
 from typing import Optional
 from attr import dataclass
 
@@ -9,8 +9,8 @@ Represents a Parsed API Endpoint
 class APIEndpoint:
     path: str
     method: str
-    parameters: List[Dict] = None
-    security: List[Dict] = None
+    parameters: List[Dict] = []
+    security: List[Dict] = []
     operation_id: Optional[str] = None
 
 

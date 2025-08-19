@@ -1,0 +1,225 @@
+openapi: 3.0.0
+info:
+  title: E-commerce API
+  version: 2.1.0
+  description: Complex e-commerce platform API
+
+servers:
+  - url: https://api.ecommerce.com/v2
+    description: Production server
+  - url: https://staging-api.ecommerce.com/v2
+    description: Staging server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - username
+      properties:
+        id:
+          type: integer
+          format: int64
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+        email:
+          type: string
+          format: email
+        profile:
+          $ref: '#/components/schemas/UserProfile'
+    
+    UserProfile:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        age:
+          type: integer
+          minimum: 13
+          maximum: 120
+
+  parameters:
+    PageLimit:
+      name: limit
+      in: query
+      description: Number of items to return
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    
+    PageOffset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+
+paths:
+  /users:
+    get:
+      summary: List users with complex filtering
+      parameters:
+        - $ref: '#/components/parameters/PageLimit'
+        - $ref: '#/components/parameters/PageOffset'
+        - name: filter
+          in: query
+          description: Complex filtering
+          style: deepObject
+          explode: true
+          schema:
+            type: object
+            properties:
+              age:
+                type: object
+                properties:
+                  min:
+                    type: integer
+                  max:
+                    type: integer
+              city:
+                type: array
+                items:
+                  type: string
+              created_after:
+                type: string
+                format: date-time
+      security:
+        - bearerAuth: []
+        - apiKey: []
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+    
+    post:
+      summary: Create new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - username
+                - email
+                - password
+              properties:
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 50
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                  pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]'
+                profile:
+                  $ref: '#/components/schemas/UserProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      security:
+        - apiKey: []
+
+  /users/{userId}/orders/{orderId}:
+    get:
+      summary: Get specific order for user
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ORD-[A-Z0-9]{10}$'
+        - name: include
+          in: query
+          description: Include related resources
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [items, shipping, payment]
+          style: form
+          explode: false
+      security:
+        - bearerAuth: [read:orders]
+    
+    patch:
+      summary: Update order
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  op:
+                    type: string
+                    enum: [add, remove, replace, move, copy, test]
+                  path:
+                    type: string
+                  value:
+                    oneOf:
+                      - type: string
+                      - type: number
+                      - type: object

@@ -1,7 +1,7 @@
 """
 Parser Is A Class That can Be Instantiated. Contains methods for parsing the OPENAPI spec.
 """
-from ast import List
+from typing import List
 from typing import Dict
 from core.types import APIEndpoint, APISpec
 import yaml
@@ -16,7 +16,7 @@ class OpenAPIParser:
         '''
         Public High Level Primary Method to Parse the APISpec 
         '''
-        pass
+        self._load_spec()
 
     def _load_spec(self):
         '''
