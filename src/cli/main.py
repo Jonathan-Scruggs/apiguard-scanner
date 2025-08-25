@@ -128,7 +128,7 @@ def scan(spec_path, target, output, format, verbose, timeout, concurrent):
     
     
 
-    open_api_parser = OpenAPIParser(file_path=spec_path)
+    open_api_parser = OpenAPIParser(file_path=spec_path, base_url=target)
     open_api_parser.parse()
     
     print_status("Security scan completed successfully!", "success", True)
