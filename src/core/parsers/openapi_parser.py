@@ -172,7 +172,18 @@ class OpenAPIParser:
     
     def _parse_security(self, security: List) -> List[Dict]:
         """Parse security requirements with scopes"""
-        pass
+        parsed_security = []
+
+        for security_req in security:
+            parsed_req = {}
+            for scheme_name, scopes in security_req.items():
+                parsed_req[scheme_name] = {
+                    'scopes': scopes,
+                    'scheme_details': self.components.get('securitySchemes', {}).get(scheme_name, {})
+                }
+
+            parsed_security.append(parsed_req)
+        return parsed_security
     def _parse_responses(self, responses: Dict) -> Dict[str, Dict]:
         """Parse response definitions"""
         parsed_responses = {}
