@@ -20,7 +20,18 @@ class OpenAPIParser:
 
         self._extract_components()
 
-        self._parse_endpoints()
+        endpoints = self._parse_endpoints()
+        info = self.spec_data.get('info', {})
+
+        title = info.get('title',{})
+        version = info.get('version', {})
+
+        return APISpec(
+            endpoints=endpoints,
+            base_url=self.base_url,
+            title=title,
+            version=version
+        )
 
     def _load_spec(self):
         '''
@@ -87,7 +98,7 @@ class OpenAPIParser:
         parameters = self._resolve_parameters(details.get('parameters', []))
 
         # 2.) Resolve request body
-        request_body = self._resolve_request_body(details.get('requestBody'), {})
+        request_body = self._parse_request_body(details.get('requestBody'), {})
 
         # 3.) Parse Security Information about this combination of path + method
         security_info = self._parse_security(details.get('security'), {})
@@ -106,16 +117,58 @@ class OpenAPIParser:
         '''
         Resolves Paramter references and extracts full schemas for those parameters.
         '''
-        pass
-    #TODO
+        resolved_parameters = [] 
+        for param in parameters:
+            if '$ref' in param:
+                ref_path = param['$ref']
+                resolved_param = self._resolve_reference(ref_path=ref_path)
+                resolved_parameters.append(resolved_param)
+            else:
+                # Extracting Parameter Details
+                param_info = {
+                    'name': param.get('name'),
+                    'in': param.get('in'),
+                    'required': param.get('required', False),
+                    'schema': param.get('schema', {}),
+                    'style': param.get('style'),
+                    'explode': param.get('explode'),
+                    'description': param.get('description')
+                }
+                resolved_parameters.append(param_info)
 
-    def _resolve_references(self, ref_path: str) -> Dict:
+        return resolved_parameters
+    def _resolve_reference(self, ref_path: str) -> Dict:
         '''Resolves $ref to actual content.'''
-        pass 
+        if ref_path.startswith("#/"):
+            # parts of path to reference
+            path_parts = ref_path[2:].split('/')
+            current = self.spec_data
 
-    def _resolve_request_body(self, request_body: Dict) -> Dict:
+            for path in path_parts:
+                current = current.get(path,{})
+            
+            return current
+        else:
+            raise ValueError(f"References to External Parameters is not supported: {ref_path}")
+
+    def _parse_request_body(self, request_body: Dict) -> Dict:
         '''Parses the request body for endpoints that accept multiple content types'''
-        pass
+        if not request_body: # Request body has a falsy value
+            return {}
+        
+        parsed_body =  {
+            'required': request_body.get('required', False),
+            'content_types': {}
+        }
+
+        content = request_body.get('content',{})
+
+        for content_type, details in content.items():
+            parsed_body['content_types'][content_type] = {
+                'schema': details.get('schema', {}),
+                'examples': details.get('examples', {})
+            }
+        return parsed_body
     
     def _parse_security(self, security: List) -> List[Dict]:
         """Parse security requirements with scopes"""
