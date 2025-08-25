@@ -11,8 +11,10 @@ class APIEndpoint:
     method: str
     parameters: List[Dict] = []
     security: List[Dict] = []
-    operation_id: Optional[str] = None
-
+    request_body: Optional[Dict] = None
+    summary: Optional[str] = None
+    responses: Dict[str, Dict] = None
+    
 
 '''
 Represents the Parsed API Spec

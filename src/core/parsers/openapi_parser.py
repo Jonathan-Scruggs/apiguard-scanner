@@ -65,12 +65,17 @@ class OpenAPIParser:
         '''
         Extracts all endpoints in the spec
         '''
-        # TODO FINISH THIS METHOD
-
         endpoints = []
         paths: Dict[str,Dict[str,Any]] = self.spec_data.get('paths', {})
-        for endpoint, methods in paths.items():
-            pass
+        for path, methods in paths.items():
+            for method, details in methods.items():
+                if method.lower() in ['post','get','put','patch', 'delete', 'head', 'options']:
+                    endpoint = self._parse_single_endpoint(path=path,method=method, details=details)
+                    endpoints.append(endpoint)
+
+        return endpoints
+    
+
 
     def _parse_single_endpoint(self, path: str, method: str, details: Dict) -> APIEndpoint:
         '''
@@ -78,11 +83,31 @@ class OpenAPIParser:
         '''
         pass
 
-    def _resolve_paramters(self, parameters: List) -> List[Dict]:
+        # 1.) Resolve parameters for that combination of path + method
+        parameters = self._resolve_parameters(details.get('parameters', []))
+
+        # 2.) Resolve request body
+        request_body = self._resolve_request_body(details.get('requestBody'), {})
+
+        # 3.) Parse Security Information about this combination of path + method
+        security_info = self._parse_security(details.get('security'), {})
+
+        responses = self._parse_responses(details.get('responses', {}))
+        return APIEndpoint(
+                            path=path,
+                            method=method.upper(),
+                            parameters=parameters,
+                            security=security_info,
+                            request_body=request_body,
+                            summary=details.get('summary',''),
+                            responses=responses
+                            )
+    def _resolve_parameters(self, parameters: List) -> List[Dict]:
         '''
         Resolves Paramter references and extracts full schemas for those parameters.
         '''
         pass
+    #TODO
 
     def _resolve_references(self, ref_path: str) -> Dict:
         '''Resolves $ref to actual content.'''
@@ -90,9 +115,31 @@ class OpenAPIParser:
 
     def _resolve_request_body(self, request_body: Dict) -> Dict:
         '''Parses the request body for endpoints that accept multiple content types'''
-    pass
+        pass
     
     def _parse_security(self, security: List) -> List[Dict]:
         """Parse security requirements with scopes"""
         pass
-    
+    def _parse_responses(self, responses: Dict) -> Dict[str, Dict]:
+        """Parse response definitions"""
+        parsed_responses = {}
+        
+        for status_code, response_def in responses.items():
+            parsed_response = {
+                'description': response_def.get('description', ''),
+                'content_types': {},
+                'headers': response_def.get('headers', {})
+            }
+            content = response_def.get('content', {})
+            for content_type, content_details in content.items():
+                schema = content_details.get('schema', {})
+                examples = content_details.get('examples', {})
+                
+                parsed_response['content_types'][content_type] = {
+                    'schema': schema,
+                    'examples': examples
+                }
+            
+            parsed_responses[status_code] = parsed_response
+        
+        return parsed_responses
