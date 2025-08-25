@@ -38,7 +38,7 @@ class OpenAPIParser:
         Internal class method used to load(open) the spec and perform basic validation on it.
         '''
         try:
-            with open('example-spec.yaml','r') as file: 
+            with open(self.spec_path,'r') as file: 
                 if self.spec_path.endswith("yaml") or self.spec_path.endswith("yml"):
                     data = yaml.load(file, Loader=yaml.SafeLoader)
                     self.spec_data = data
@@ -98,10 +98,10 @@ class OpenAPIParser:
         parameters = self._resolve_parameters(details.get('parameters', []))
 
         # 2.) Resolve request body
-        request_body = self._parse_request_body(details.get('requestBody'), {})
+        request_body = self._parse_request_body(details.get('requestBody',{}))
 
         # 3.) Parse Security Information about this combination of path + method
-        security_info = self._parse_security(details.get('security'), {})
+        security_info = self._parse_security(details.get('security', []))
 
         responses = self._parse_responses(details.get('responses', {}))
         return APIEndpoint(
