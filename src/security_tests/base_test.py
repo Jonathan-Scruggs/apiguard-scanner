@@ -43,7 +43,7 @@ class Vulnerability:
     confidence: float = 1.0 
     
 
-class BaseSecuritytest(ABC):
+class BaseSecurityTest(ABC):
     "Abstract Base Class for all Security Tests"
 
     # Test metadta that is overriden in subclass
