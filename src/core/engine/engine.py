@@ -53,7 +53,7 @@ class SecurityScanner:
         failed_tests = []
 
 
-        async def run_single_test(test_class: type[BaseSecurityTest], endpoint: APIEndpoint):
+        async def run_single_test(test_class: type[BaseSecurityTest], endpoint: APIEndpoint) -> List[Vulnerability]:
             
             nonlocal completed_tests # To declare that this variable is the completed tests in the scan(nearest enclosing scope)
 
@@ -95,9 +95,14 @@ class SecurityScanner:
         for endpoint in api_spec.endpoints:
             applicable_tests: List[type[BaseSecurityTest]] = self.test_selector.select_tests_for_endpoint(endpoint=endpoint)
             for test_class in applicable_tests:
-                test_task = asyncio.create_task(run_single_test(test_class,endpoint))
+                test_task = asyncio.create_task(run_single_test(test_class,endpoint)) # Creating and running tasks
                 all_tasks.append(test_task)
 
         results = await asyncio.gather(*all_tasks, return_exceptions=True) # Waiting for all tasks to finish
-        # TODO Hand off results to eventual report generator.
-        
+       
+
+        for result in results:
+            if isinstance(result, list):
+                all_vulnerabilities.extend(result)
+
+         # TODO Hand off results to eventual report generator.
