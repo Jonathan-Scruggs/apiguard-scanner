@@ -118,7 +118,5 @@ class BaseSecurityTest(ABC):
             references.append(f"https://owasp.org/API-Security/editions/2023/en/{self.owasp_category.lower()}/")
         references.append("https://owasp.org/www-project-web-security-testing-guide/")
 
-        # TODO: Decide if still want to include cwe stuff.
-        if self.cwe_id:
-            references.append("https://cwe.mitre.org/top25/archive/2023/2023_top25_list.html")
+       
         return references

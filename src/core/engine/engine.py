@@ -1,9 +1,9 @@
 import asyncio
 from typing import List
 import aiohttp
-from core.types import APISpec
+from core.types import APIEndpoint, APISpec
 from .test_selector import TestSelector
-from ...security_tests.base_test import Vulnerability
+from ...security_tests.base_test import BaseSecurityTest, Vulnerability
 
 class SecurityScanner:
     """
@@ -39,17 +39,65 @@ class SecurityScanner:
         '''
         Scans APISpec
         Relevant Documentation: https://docs.python.org/3/library/threading.html#semaphore-example
-        
-        '''
-        test_tasks = []
-        # Gathering all the test coroutines
+        '''    
+        total_tests = 0
         for endpoint in api_spec.endpoints:
-            applicable_tests = self.test_selector.select_tests_for_endpoint(endpoint=endpoint)
+            applicable_tests = self.test_selector.select_tests_for_endpoint(endpoint)
+            total_tests += len(applicable_tests)
 
-            async with asyncio.TaskGroup() as tg:
-                 for test_class in applicable_tests:
-                    test_instance = test_class(endpoint=endpoint, target_url=self.target,session=self.session,config=self.config) 
-                    test_task = tg.create_task(test_instance.execute())
-                    test_tasks.append(test_task)
+        # User can later on set in the config the max number of concurrent tests they want to run
+        semaphore = asyncio.Semaphore(self.config.get('max_concurrent'),40) 
+        # Progress Tracking
+        completed_tests = 0
+        all_vulnerabilities = []
+        failed_tests = []
 
-        # After this point all tasks are complete 
+
+        async def run_single_test(test_class: type[BaseSecurityTest], endpoint: APIEndpoint):
+            
+            nonlocal completed_tests # To declare that this variable is the completed tests in the scan(nearest enclosing scope)
+
+            async with semaphore:
+                
+                test_name = test_class.name
+                endpoint_str = f"{endpoint.method} {endpoint.path}"
+                try: 
+                    
+                    test_instance = test_class(endpoint=endpoint, target_url=self.target,session=self.session)
+                    vulnerabilites = await test_instance.execute()
+
+                    completed_tests += 1
+                    if completed_tests % 10 == 0 or completed_tests == total_tests:
+                        progress = (completed_tests / total_tests) * 100
+                    return vulnerabilites
+
+                except asyncio.TimeoutError:
+                    error = f"Test '{test_name}' timed out on {endpoint_str}"
+                    failed_tests.append(error)
+                    completed_tests += 1
+                    return [] 
+
+                except aiohttp.ClientError as e:
+                    error = f"Network error in '{test_name}' on {endpoint_str}: {e}"
+                    failed_tests.append(error)
+                    completed_tests += 1
+                    return []
+                
+                except Exception as e:
+                    error = f"Test '{test_name}' failed on {endpoint_str}: {e}"
+                    failed_tests.append(error)
+                    completed_tests += 1
+                    return []
+
+        # Creating all the test tasks    
+        all_tasks = []
+
+        for endpoint in api_spec.endpoints:
+            applicable_tests: List[type[BaseSecurityTest]] = self.test_selector.select_tests_for_endpoint(endpoint=endpoint)
+            for test_class in applicable_tests:
+                test_task = asyncio.create_task(run_single_test(test_class,endpoint))
+                all_tasks.append(test_task)
+
+        results = await asyncio.gather(*all_tasks, return_exceptions=True) # Waiting for all tasks to finish
+        # TODO Hand off results to eventual report generator.
+        
