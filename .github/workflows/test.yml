@@ -13,8 +13,8 @@ jobs:
 
         strategy:
             matrix:
-                python-version: [3.8, 3.9, 3.10, 3.11]
-
+                python-version: ['3.8', '3.9', '3.10', '3.11'] # Have to put quotes around to fix parsing error
+ 
         steps:
             - uses: actions/checkout@v5 # Note: this is the pre-built github action that downloads our repo code
 
