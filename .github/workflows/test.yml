@@ -40,7 +40,7 @@ jobs:
             # files for the main and dev branches respectively.
             - name: Install dependencies
               run: | # # Ensuring we have latest version of pip
-                pyhton -m pip install --upgrade pip  
+                python -m pip install --upgrade pip  
                 pip install -r requirements.txt
                 pip install -r requirements-dev.txt
 
