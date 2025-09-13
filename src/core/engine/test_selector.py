@@ -1,5 +1,5 @@
 from typing import List, Type
-from ....src.security_tests.base_test import BaseSecurityTest
+from src.security_tests.base_test import BaseSecurityTest
 
 
 # Temporarily going to import tests manually to simplify pipeline(MVP)

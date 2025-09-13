@@ -46,7 +46,8 @@ class SecurityScanner:
             total_tests += len(applicable_tests)
 
         # User can later on set in the config the max number of concurrent tests they want to run
-        semaphore = asyncio.Semaphore(self.config.get('max_concurrent'),40) 
+    
+        semaphore = asyncio.Semaphore(self.config.get('max_concurrent',40)) 
         # Progress Tracking
         completed_tests = 0
         all_vulnerabilities = []
@@ -104,5 +105,5 @@ class SecurityScanner:
         for result in results:
             if isinstance(result, list):
                 all_vulnerabilities.extend(result)
-
+        return all_vulnerabilities
          # TODO Hand off results to eventual report generator.

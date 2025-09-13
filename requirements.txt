@@ -1,12 +1,19 @@
 aiohappyeyeballs==2.6.1
 aiohttp==3.12.15
 aiosignal==1.4.0
+-e git+https://github.com/Jonathan-Scruggs/apiguard-scanner.git@ada01e169d16b8c767f01470714596ab7f8ef67b#egg=apiguard_scanner
 attrs==25.3.0
 click==8.2.1
 colorama==0.4.6
 frozenlist==1.7.0
 idna==3.10
+markdown-it-py==4.0.0
+mdurl==0.1.2
 multidict==6.6.3
 propcache==0.3.2
+Pygments==2.19.2
 PyYAML==6.0.2
+rich==14.1.0
+setuptools==80.9.0
+types-PyYAML==6.0.12.20250822
 yarl==1.20.1

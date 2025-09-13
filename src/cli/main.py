@@ -13,8 +13,6 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeEl
 from rich.text import Text
 from rich.syntax import Syntax
 from rich.align import Align
-
-from core.engine.engine import SecurityScanner
 from core.parsers.openapi_parser import OpenAPIParser
 console = Console()
 
@@ -97,7 +95,7 @@ def show_scan_summary(spec_file, target, output_format, concurrent, timeout):
 @click.option('--timeout', default=30, help='Request timeout in seconds')
 @click.option('--concurrent', '-c', default=10, help='Max concurrent requests')
 
-async def scan(spec_path, target, output, format, verbose, timeout, concurrent):
+def scan(spec_path, target, output, format, verbose, timeout, concurrent):
     """
     Scans an API for security vulnerabilities. 
 

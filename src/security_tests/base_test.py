@@ -37,9 +37,9 @@ class Vulnerability:
     owasp_category: Optional[str] = None # OWASP mapping
     endpoint: Optional[str] = None
     method: Optional[str] = None# HTTP method
-    evidence: Optional[Dict[str, Any]] = None
+    evidence: Optional[Dict[str, Any]] = [None]
     remediation: Optional[str] = None
-    references: List[str] = None
+    references: List[str] = []
     confidence: float = 1.0 
     
 

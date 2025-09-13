@@ -10,7 +10,7 @@ class OpenAPIParser:
     def __init__(self, file_path: str, base_url: str):
         self.spec_path = file_path
         self.spec_data: Dict[str, Any] = {} # Raw Spec Data
-        self.components = {} # Spec Resuable parts like security schemas and object schemas
+        self.components: Dict[str,Dict] = {} # Spec Resuable parts like security schemas and object schemas
         self.base_url = base_url
     def parse(self) -> APISpec:
         '''
@@ -25,7 +25,7 @@ class OpenAPIParser:
 
         title = info.get('title',{})
         version = info.get('version', {})
-
+        print("Components", self.components)
         return APISpec(
             endpoints=endpoints,
             base_url=self.base_url,
