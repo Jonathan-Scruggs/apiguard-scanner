@@ -1,1 +1,76 @@
-CI/CD pipeline
+# Note: This is what will be shown in Github's Actions tab - we can change later on
+name: Test Suite
+# On defines when the workflow runs.
+on: 
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                python-version: [3.8, 3.9, 3.10, 3.11]
+
+        steps:
+            - uses: actions/checkout@v5 # Note: this is the pre-built github action that downloads our repo code
+
+            # Step that install specified Python version in the VM environment
+            - name: Set up Python ${{ matrix.python-version }} # Template syntax
+              uses: actions/setup-python@v6 # Current on v6
+              with: 
+                python-version: ${{ matrix.python-version}}
+
+            # Caches the pip downloads between runs to speed up the build
+            # https://docs.github.com/en/actions/reference/workflows-and-actions/dependency-caching#cache-action-usage
+            - name: Cache dependencies
+              uses: actions/cache@v4
+              with:
+                path: ~/.cache/pip
+                key: ${{ runner.os }}--pip ${{hashFiles('**/requirements*.txt') }}
+                # Fallback
+                restore-keys: |
+                    ${{ runner.os }}-pip-
+
+            # Upgrades pip and installs all dependencies
+            # Adding pip install requirements-dev.txt just in case in future I decide to make two seperate requirements.txt
+            # files for the main and dev branches respectively.
+            - name: Install dependencies
+              run: | # # Ensuring we have latest version of pip
+                pyhton -m pip install --upgrade pip  
+                pip install -r requirements.txt
+                pip install -r requirements-dev.txt
+
+            # Code quality Checks using Flake8 cli. https://flake8.pycqa.org/en/latest/
+            # First line: Fails on syntax errors (E9,F63,F7,F82)
+            # Second line: Warns on style issues but doesn't fail (--exit-zero)
+            - name: Lint with flake8
+              run: |
+                pip instlal flake8
+                 flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
+                 flake8 src --count --exit-zero --max-complexity=10 --statistics
+            
+            # Static Type Checking, validates the type hints
+            # --ignore-missing-imports makes it so we don't fail on 3rd party libraries that may lack type information.
+            - name: Type check with mypy
+              run: |
+                pip install mypy
+                mypy src --ignore-missing-imports
+
+
+            # Run test suite with coverage
+            # --cov-report=xml: Generate coverage report
+            - name: Test with pytest
+              run: |
+                pytest tests/ -v --cov=src --cov-report=xml
+
+            # Uploading the coverage data to codecov.io to track overall test coverage
+            # https://github.com/codecov/codecov-action
+            - name: Upload coverage to Codecov
+              uses: codecov/codecov-action@v5 # Using predefined github action to upload test coverage to codecov.io for tracking
+              with:
+                file: ./coverage.xml
+                fail_ci_if_error: true
