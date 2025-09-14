@@ -58,7 +58,7 @@ jobs:
             - name: Type check with mypy
               run: |
                 pip install mypy
-                mypy src --ignore-missing-imports
+                mypy src --ignore-missing-imports --explicit-package-bases
 
 
             # Run test suite with coverage
