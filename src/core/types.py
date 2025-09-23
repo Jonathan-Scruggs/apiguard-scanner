@@ -12,8 +12,8 @@ class APIEndpoint:
     parameters: List[Dict] = []
     security: List[Dict] = []
     responses: Dict[str, Dict] = {}
-    request_body: Optional[Dict] = None
-    summary: Optional[str] = None
+    request_body: Optional[Dict] = {}
+    summary: Optional[str] = ""
     
     
 
