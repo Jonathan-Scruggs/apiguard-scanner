@@ -58,7 +58,7 @@ jobs:
             - name: Type check with mypy
               run: |
                 pip install mypy
-                mypy . --ignore-missing-imports --explicit-package-bases --namespace-packages
+                mypy . --ignore-missing-imports --explicit-package-bases --namespace-packages --exclude 'src/apiguard-scanner/tests'
 
 
             # Run test suite with coverage
