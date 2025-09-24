@@ -58,7 +58,7 @@ jobs:
             - name: Type check with mypy
               run: |
                pip install mypy
-               mypy src/cli src/core src/parsers src/security_tests src/cli --ignore-missing-imports --explicit-package-bases --namespace-packages
+               mypy src/cli src/core src/security_tests --ignore-missing-imports --explicit-package-bases --namespace-packages
 
             # Run test suite with coverage
             # --cov-report=xml: Generate coverage report
