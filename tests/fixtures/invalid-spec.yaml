@@ -1,0 +1,9 @@
+openapi: 2.0.0  # Version that isn't supported by the scanner
+info:
+  title: Invalid API
+  version: 1.0.0
+# Missing a lot of the requireed fields and structure of the spec needed to scan
+paths:
+  /broken:
+    invalid_method:
+      summary: This should not work
