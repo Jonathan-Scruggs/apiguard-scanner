@@ -28,6 +28,6 @@ class TestSelector:
 
         # Sorting Tests By Priority so higher priority tests are run first
 
-        sorted(applicable_tests, key=lambda test_class_instance: test_class_instance.priority)
+        sorted(applicable_tests, key=lambda test_class_instance: test_class_instance.priority.value)
 
         return applicable_tests

@@ -118,5 +118,5 @@ class BaseSecurityTest(ABC):
             references.append(f"https://owasp.org/API-Security/editions/2023/en/{self.owasp_category.lower()}/")
         references.append("https://owasp.org/www-project-web-security-testing-guide/")
 
-       
         return references
+    
