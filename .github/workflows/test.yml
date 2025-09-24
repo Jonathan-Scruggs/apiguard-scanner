@@ -57,9 +57,8 @@ jobs:
             # --ignore-missing-imports makes it so we don't fail on 3rd party libraries that may lack type information.
             - name: Type check with mypy
               run: |
-                pip install mypy
-                mypy . --ignore-missing-imports --explicit-package-bases --namespace-packages --exclude 'src/apiguard-scanner/tests'
-
+               pip install mypy
+               mypy src/cli src/core src/parsers src/security_tests src/cli --ignore-missing-imports --explicit-package-bases --namespace-packages
 
             # Run test suite with coverage
             # --cov-report=xml: Generate coverage report
