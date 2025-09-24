@@ -42,7 +42,7 @@ class SecurityScanner:
         '''    
         total_tests = 0
         for endpoint in api_spec.endpoints:
-            applicable_tests = self.test_selector.select_tests_for_endpoint(endpoint)
+            applicable_tests: List[type[BaseSecurityTest]] = self.test_selector.select_tests_for_endpoint(endpoint)
             total_tests += len(applicable_tests)
 
         # User can later on set in the config the max number of concurrent tests they want to run
@@ -64,7 +64,7 @@ class SecurityScanner:
                 endpoint_str = f"{endpoint.method} {endpoint.path}"
                 try: 
                     
-                    test_instance = test_class(endpoint=endpoint, target_url=self.target,session=self.session)
+                    test_instance = test_class(endpoint=endpoint, target_url=self.target,session=self.session,config=None) # TODO Change config later on
                     vulnerabilites = await test_instance.execute()
 
                     completed_tests += 1
@@ -94,7 +94,7 @@ class SecurityScanner:
         all_tasks = []
 
         for endpoint in api_spec.endpoints:
-            applicable_tests: List[type[BaseSecurityTest]] = self.test_selector.select_tests_for_endpoint(endpoint=endpoint)
+            applicable_tests = self.test_selector.select_tests_for_endpoint(endpoint=endpoint)
             for test_class in applicable_tests:
                 test_task = asyncio.create_task(run_single_test(test_class,endpoint)) # Creating and running tasks
                 all_tasks.append(test_task)

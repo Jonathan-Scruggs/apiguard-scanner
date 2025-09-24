@@ -37,7 +37,7 @@ class Vulnerability:
     owasp_category: Optional[str] = None # OWASP mapping
     endpoint: Optional[str] = None
     method: Optional[str] = None# HTTP method
-    evidence: Optional[Dict[str, Any]] = [None]
+    evidence: Optional[Dict[str, Any]] | None = None
     remediation: Optional[str] = None
     references: List[str] = []
     confidence: float = 1.0 
@@ -89,7 +89,7 @@ class BaseSecurityTest(ABC):
         title: str,
         description: str,
         severity: VulnerabilitySeverity,
-        evidence: Dict[str, Any] = None,
+        evidence: Dict[str, Any] = {},
         confidence: float = 1.0 # Default value of 1
     ) -> Vulnerability:
         """Helper function to create vulnerability objects"""

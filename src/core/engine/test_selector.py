@@ -23,11 +23,11 @@ class TestSelector:
             # Temporary instance with temporary arguements so we can call is_applicable
             test_class_instance = test_class(endpoint=endpoint,target_url=" ",session=None,config=self.config) 
 
-            if test_class_instance.is_applicable():
+            if test_class_instance.is_applicable(endpoint):
                 applicable_tests.append(test_class)
 
         # Sorting Tests By Priority so higher priority tests are run first
 
-        sorted(applicable_tests, key=lambda test: test.priority)
+        sorted(applicable_tests, key=lambda test_class_instance: test_class_instance.priority)
 
         return applicable_tests
